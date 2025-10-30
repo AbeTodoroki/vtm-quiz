@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Which Vampire: The Masquerade Clan Are You?</title>
+  <style>
+    :root{
+      --bg:#070607;
+      --panel:#0f0f10;
+      --muted:#9a9a9a;
+      --accent:#8b0000;
+      --green:#2aa04a;
+      --red:#d14b4b;
+      --grey:#8e8e93;
+      --track:#222;
+      --glass:rgba(255,255,255,0.02);
+      font-synthesis: none;
+    }
+    html,body{height:100%;margin:0;background:
+      linear-gradient(180deg,#040404 0%, #0b0b0d 100%);
+      color:#efefef;font-family:Georgia, 'Times New Roman', serif; -webkit-font-smoothing:antialiased;}
+    .container{max-width:1100px;margin:18px auto;padding:22px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:12px;box-shadow:0 8px 50px rgba(0,0,0,0.7)}
+    h1{margin:0;font-size:26px;font-weight:700}
+    .subtitle{color:var(--muted);margin-top:6px;margin-bottom:18px}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .slider-card{background:var(--panel);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+    .prompt{font-weight:700;margin-bottom:8px;font-size:15px}
+    .labels{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:8px}
+    input[type=range]{width:100%;-webkit-appearance:none;height:10px;background:var(--track);border-radius:8px;outline:none}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(139,0,0,0.45);border:2px solid #000}
+    .badges{display:flex;gap:8px;align-items:center;margin-top:8px}
+    .badge{min-width:92px;padding:6px 8px;border-radius:8px;text-align:center;font-size:13px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+    .badge.small{min-width:74px}
+    .badge.grey{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));color:var(--grey);border-color:rgba(255,255,255,0.02)}
+    .badge.green{background:linear-gradient(180deg, rgba(42,160,74,0.09), rgba(42,160,74,0.06));color:var(--green);border-color:rgba(42,160,74,0.1)}
+    .badge.red{background:linear-gradient(180deg, rgba(209,75,75,0.06), rgba(209,75,75,0.03));color:var(--red);border-color:rgba(209,75,75,0.08)}
+    .controls{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+    button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:9px;cursor:pointer;font-weight:700}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    .result{margin-top:18px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border-radius:10px;display:none}
+    .primary{display:flex;gap:12px;align-items:center}
+    .icon{width:96px;height:96px;border-radius:12px;background:var(--glass);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03)}
+    .clan-title{margin:0;font-size:20px}
+    .clan-desc{color:var(--muted);margin-top:6px}
+    .secondary-list{display:flex;gap:12px;margin-top:12px}
+    .secondary-card{flex:1;padding:10px;background:rgba(255,255,255,0.02);border-radius:8px}
+    .full-list{margin-top:14px}
+    .bar-row{display:flex;align-items:center;gap:12px;margin:8px 0}
+    .bar-label{flex:0 0 200px;color:var(--muted);font-size:14px}
+    .track{flex:1;background:rgba(255,255,255,0.03);height:14px;border-radius:8px;position:relative;overflow:hidden}
+    .fill{height:100%;background:linear-gradient(90deg, rgba(139,0,0,0.9), rgba(180,30,30,0.9));min-width:6px}
+    .pct{width:64px;text-align:right;color:var(--muted);font-size:13px}
+    .howto{color:var(--muted);font-size:13px;margin-top:10px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    @media (max-width:560px){.bar-label{flex:0 0 120px}}
+  </style>
+</head>
+<body>
+  <div class="container" role="application" aria-labelledby="title">
+    <h1 id="title">Which Vampire: The Masquerade Clan Are You?</h1>
+    <div class="subtitle">A gothic, slider-only personality quiz. Move each slider; results are calculated from weighted contributions across all sliders.</div>
+
+    <form id="quiz" onsubmit="return false;">
+      <div class="grid" id="slidersGrid"></div>
+
+      <div class="controls">
+        <button type="button" id="reveal">Reveal Your Clan</button>
+        <button type="button" id="reset" class="ghost">Reset Sliders</button>
+      </div>
+
+      <div id="results" class="result" aria-live="polite" aria-atomic="true">
+        <div class="primary">
+          <div class="icon" id="primaryIcon" aria-hidden="true"></div>
+          <div>
+            <h2 id="primaryName" class="clan-title">Primary Clan</h2>
+            <div id="primaryDesc" class="clan-desc">Your clan description will appear here.</div>
+          </div>
+        </div>
+
+        <div class="secondary-list" id="secondaries" aria-hidden="true"></div>
+
+        <div class="howto">
+          How to read this: each slider gives a continuous value from 0 (left trait) to 100 (right trait). Left contribution = 100 − value; right contribution = value. Each clan multiplies those contributions by the clan's weights and sums them; final clan percentages are normalized to total 100%.
+        </div>
+
+        <div class="full-list" id="fullList" role="region" aria-label="Full clan affinity list"></div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // === Slider definitions (36 sliders) ===
+    const sliders = [
+      {id:'s1', leftLabel:'Artistic', rightLabel:'Scientific', prompt:'Do you trust beauty or reason?'},
+      {id:'s2', leftLabel:'Beauty', rightLabel:'Utility', prompt:'Is life for art or for use?'},
+      {id:'s3', leftLabel:'Book Smart', rightLabel:'Street Smart', prompt:'Do you favor study or cunning?'},
+      {id:'s4', leftLabel:'Cautious', rightLabel:'Daring', prompt:'Do you step softly or leap?'},
+      {id:'s5', leftLabel:'Compassionate', rightLabel:'Dispassionate', prompt:'Do you move by heart or by distance?'},
+      {id:'s6', leftLabel:'Competitive', rightLabel:'Casual', prompt:'Do you hunger to win or drift?'},
+      {id:'s7', leftLabel:'Confident', rightLabel:'Needs Reassurance', prompt:'Do you stand or seek steadiness?'},
+      {id:'s8', leftLabel:'Creative', rightLabel:'Conventional', prompt:'Do you craft novelties or follow form?'},
+      {id:'s9', leftLabel:'Decisive', rightLabel:'Indecisive', prompt:'Do you cut choices or weigh them endless?'},
+      {id:'s10', leftLabel:'Dependable', rightLabel:'Flexible', prompt:'Do you root or bend to currents?'},
+      {id:'s11', leftLabel:'Down to Earth', rightLabel:'Head in the Clouds', prompt:'Practical feet or dreamer’s step?'},
+      {id:'s12', leftLabel:'End Justifies the Means', rightLabel:'Honorable Actions', prompt:'Will you stain hands for a cause?'},
+      {id:'s13', leftLabel:'Fencing', rightLabel:'Boxing', prompt:'Graceful point or blunt strike?'},
+      {id:'s14', leftLabel:'Flamboyant', rightLabel:'Reserved', prompt:'Do you demand the stage or fade away?'},
+      {id:'s15', leftLabel:'Free-spirited', rightLabel:'Disciplined', prompt:'Wander the wind or keep the line?'},
+      {id:'s16', leftLabel:'Guard dog', rightLabel:'Alley cat', prompt:'Protector’s bark or sly prowler?'},
+      {id:'s17', leftLabel:'Heart', rightLabel:'Head', prompt:'Follow feeling or reason?'},
+      {id:'s18', leftLabel:'Heart on Sleeve', rightLabel:'Poker Face', prompt:'Wear your soul or hide it?'},
+      {id:'s19', leftLabel:'Hierarchy', rightLabel:'Heterarchy', prompt:'Order of thrones or loose coalitions?'},
+      {id:'s20', leftLabel:'Hotel', rightLabel:'Camping', prompt:'Comfort of city or rough nights?'},
+      {id:'s21', leftLabel:'Leader', rightLabel:'Facilitator', prompt:'Command the room or lift others?'},
+      {id:'s22', leftLabel:'Letter of the Law', rightLabel:'Spirit of the Law', prompt:'Obey text or honor intent?'},
+      {id:'s23', leftLabel:'Library', rightLabel:'Dojo', prompt:'Study in silence or train with sweat?'},
+      {id:'s24', leftLabel:'Likes Change', rightLabel:'Likes Stability', prompt:'Crave new or keep steady?'},
+      {id:'s25', leftLabel:'Likes to take things apart', rightLabel:'If it ain\\'t broke, don\\'t fix it', prompt:'Tinker or preserve?'},
+      {id:'s26', leftLabel:'Obedient', rightLabel:'Rebellious', prompt:'Follow orders or break them?'},
+      {id:'s27', leftLabel:'Paladin', rightLabel:'Rogue', prompt:'Uphold virtue or bend rules?'},
+      {id:'s28', leftLabel:'Peacemaker', rightLabel:'Firebrand', prompt:'Still waters or roaring flame?'},
+      {id:'s29', leftLabel:'Planner', rightLabel:'Spontaneous', prompt:'Chart the map or trust the wind?'},
+      {id:'s30', leftLabel:'Playful', rightLabel:'Serious', prompt:'Jester or stern sentinel?'},
+      {id:'s31', leftLabel:'Spiritual', rightLabel:'Skeptical', prompt:'Sacred touch or critical eye?'},
+      {id:'s32', leftLabel:'Tells the Truth', rightLabel:'Bends the Truth', prompt:'Speak plainly or shade the facts?'},
+      {id:'s33', leftLabel:'Tense', rightLabel:'Relaxed', prompt:'Wound tight or easy rope?'},
+      {id:'s34', leftLabel:'Thinks Outside the Box', rightLabel:'Colors Inside the Lines', prompt:'Invent or follow lines?'},
+      {id:'s35', leftLabel:'Transparency', rightLabel:'Need-to-Know', prompt:'Open books or locked files?'},
+      {id:'s36', leftLabel:'Wolf Pack', rightLabel:'Lone Wolf', prompt:'Hunt with others or by yourself?'}
+    ];
+
+    // === Clans (14) in order: Banu Haqim, Brujah, Gangrel, Hecata, Lasombra, Malkavian, Ministry, Nosferatu, Ravnos, Salubri, Toreador, Tremere, Tzimisce, Ventrue ===
+    const clanNames = ['Banu Haqim','Brujah','Gangrel','Hecata','Lasombra','Malkavian','Ministry','Nosferatu','Ravnos','Salubri','Toreador','Tremere','Tzimisce','Ventrue'];
+
+    // === Weight matrix: an array with one entry per slider; each entry is an array of 14 [leftWeight,rightWeight] pairs matching clanNames order.
+    // Blank/omitted entries treated as 0/0. (Transcribed from user-supplied table; '?' resolved as sensible integer.)
+    const weights = [
+      // s1 Artistic / Scientific
+      [[0,0],[0,1],[0,0],[1,2],[0,0],[1,0],[0,0],[0,0],[0,0],[0,0],[3,0],[0,3],[3,1],[0,0]],
+      // s2 Beauty / Utility
+      [[0,1],[0,0],[0,1],[1,2],[1,1],[1,1],[2,2],[0,3],[2,0],[0,1],[3,0],[0,1],[3,1],[0,1]],
+      // s3 Book Smart / Street Smart
+      [[2,1],[2,2],[0,3],[2,1],[0,1],[2,1],[1,2],[1,2],[0,3],[1,2],[1,1],[3,0],[1,0],[2,1]],
+      // s4 Cautious / Daring
+      [[2,0],[0,2],[0,1],[1,1],[1,0],[1,1],[1,2],[3,0],[0,3],[2,0],[2,2],[2,0],[0,2],[2,1]],
+      // s5 Compassionate / Dispassionate
+      [[0,2],[1,0],[0,1],[0,2],[0,2],[2,1],[1,1],[1,1],[0,1],[3,0],[2,1],[0,1],[0,3],[0,2]],
+      // s6 Competitive / Casual
+      [[0,0],[1,0],[0,0],[1,0],[3,0],[0,0],[0,1],[0,1],[0,2],[0,0],[2,1],[1,0],[2,0],[2,0]],
+      // s7 Confident / Needs Reassurance
+      [[1,0],[2,0],[0,0],[1,0],[3,0],[1,2],[2,1],[0,1],[0,0],[0,1],[2,1],[1,0],[2,0],[3,0]],
+      // s8 Creative / Conventional
+      [[0,2],[1,0],[1,0],[1,1],[0,1],[2,0],[1,0],[0,2],[2,0],[1,0],[2,1],[0,2],[2,0],[0,2]],
+      // s9 Decisive / Indecisive
+      [[1,0],[2,0],[1,0],[0,0],[2,0],[1,2],[0,0],[0,0],[0,0],[0,0],[1,1],[0,0],[1,0],[2,0]],
+      // s10 Dependable / Flexible
+      [[2,0],[0,0],[2,1],[0,1],[2,0],[0,1],[2,1],[1,0],[0,1],[0,0],[1,1],[1,1],[1,1],[2,0]],
+      // s11 Down to Earth / Head in the Clouds
+      [[2,0],[0,0],[1,0],[0,2],[1,0],[0,3],[0,0],[2,0],[0,1],[0,0],[1,2],[1,1],[0,0],[2,0]],
+      // s12 End Justifies Means / Honorable Actions
+      [[0,3],[0,0],[0,1],[2,0],[3,0],[1,1],[1,0],[1,0],[0,0],[0,0],[0,0],[2,0],[2,0],[2,0]],
+      // s13 Fencing / Boxing
+      [[2,1],[0,2],[0,2],[0,1],[0,2],[0,0],[0,0],[0,1],[0,0],[0,0],[0,0],[0,0],[0,1],[1,1]],
+      // s14 Flamboyant / Reserved
+      [[0,1],[1,0],[0,2],[0,1],[1,0],[1,1],[2,0],[0,3],[2,0],[0,2],[3,0],[1,2],[2,0],[2,0]],
+      // s15 Free-spirited / Disciplined
+      [[0,3],[3,0],[2,0],[1,1],[1,2],[1,0],[2,0],[0,1],[3,0],[0,0],[2,1],[0,3],[1,0],[0,2]],
+      // s16 Guard dog / Alley cat
+      [[2,2],[0,2],[2,2],[1,1],[0,1],[0,1],[1,0],[2,0],[0,1],[0,0],[1,0],[0,1],[1,0],[0,0]],
+      // s17 Heart / Head
+      [[0,1],[2,0],[1,0],[0,2],[0,1],[2,2],[0,1],[0,1],[1,0],[0,0],[2,1],[0,2],[1,1],[0,1]],
+      // s18 Heart on Sleeve / Poker Face
+      [[0,1],[2,0],[1,0],[0,0],[0,2],[1,0],[0,1],[0,1],[1,0],[0,0],[2,2],[0,1],[0,1],[0,2]],
+      // s19 Hierarchy / Heterarchy
+      [[2,0],[0,2],[0,2],[2,0],[1,0],[0,0],[0,1],[1,1],[0,3],[0,1],[1,0],[3,0],[0,0],[2,0]],
+      // s20 Hotel / Camping
+      [[0,0],[0,0],[0,3],[0,1],[1,0],[0,0],[0,3],[0,1],[0,2],[0,0],[2,0],[1,0],[1,0],[2,0]],
+      // s21 Leader / Facilitator
+      [[0,0],[1,0],[0,0],[0,1],[3,0],[0,2],[1,2],[0,1],[0,1],[0,0],[1,2],[0,1],[0,1],[3,0]],
+      // s22 Letter of the Law / Spirit of the Law
+      [[2,2],[0,1],[0,0],[0,1],[1,1],[1,1],[0,1],[0,0],[0,0],[0,0],[0,0],[1,0],[0,0],[1,2]],
+      // s23 Library / Dojo
+      [[1,2],[1,2],[0,1],[3,0],[0,0],[1,0],[0,0],[0,0],[0,0],[1,0],[1,0],[3,0],[1,0],[0,0]],
+      // s24 Likes Change / Likes Stability
+      [[0,2],[3,0],[2,0],[1,0],[0,1],[1,1],[0,2],[0,2],[3,0],[0,1],[1,1],[0,2],[2,0],[0,2]],
+      // s25 Likes to take things apart / If it ain't broke
+      [[1,1],[0,0],[0,0],[3,0],[1,1],[0,0],[0,0],[1,1],[0,0],[0,0],[1,0],[1,0],[3,0],[0,1]],
+      // s26 Obedient / Rebellious
+      [[2,0],[0,3],[0,1],[0,1],[1,1],[0,2],[0,2],[1,0],[0,2],[0,1],[1,1],[3,0],[0,1],[1,0]],
+      // s27 Paladin / Rogue
+      [[2,1],[1,0],[0,1],[0,1],[0,2],[0,0],[0,1],[0,3],[0,3],[2,1],[0,1],[0,1],[0,1],[0,0]],
+      // s28 Peacemaker / Firebrand
+      [[1,0],[0,3],[0,1],[0,1],[0,2],[0,2],[0,0],[0,0],[0,1],[3,0],[1,1],[0,0],[0,1],[1,0]],
+      // s29 Planner / Spontaneous
+      [[1,1],[0,1],[0,1],[2,0],[2,1],[1,2],[1,0],[2,0],[0,2],[2,0],[1,1],[1,0],[1,2],[2,1]],
+      // s30 Playful / Serious
+      [[0,2],[1,0],[1,2],[0,1],[2,1],[2,1],[1,0],[0,1],[2,0],[0,2],[2,0],[0,1],[2,1],[0,1]],
+      // s31 Spiritual / Skeptical
+      [[2,0],[0,1],[1,0],[2,1],[2,0],[1,1],[3,0],[1,0],[1,0],[2,0],[0,1],[1,2],[1,1],[0,1]],
+      // s32 Tells the Truth / Bends the Truth
+      [[3,0],[1,0],[1,0],[0,1],[0,1],[1,1],[0,2],[1,2],[0,3],[2,0],[0,2],[0,2],[0,2],[0,2]],
+      // s33 Tense / Relaxed
+      [[2,0],[1,0],[2,1],[1,1],[1,0],[2,0],[0,1],[2,0],[0,1],[2,0],[0,1],[1,0],[1,0],[1,0]],
+      // s34 Thinks Outside the Box / Colors Inside the Lines
+      [[0,1],[1,0],[1,0],[1,0],[2,1],[3,0],[2,0],[0,2],[1,0],[1,0],[2,1],[1,2],[3,0],[1,2]],
+      // s35 Transparency / Need-to-Know
+      [[1,0],[2,1],[1,0],[0,2],[0,1],[1,2],[0,0],[0,3],[0,0],[0,0],[0,1],[0,2],[0,1],[0,1]],
+      // s36 Wolf Pack / Lone Wolf
+      [[0,1],[1,0],[0,3],[2,1],[1,0],[0,1],[2,0],[1,2],[2,1],[0,2],[2,0],[1,0],[0,1],[1,0]]
+    ];
+
+    // === Clan descriptions (2-3 sentences, gothic flavor) ===
+    const descriptions = {
+      'Banu Haqim': `A blade sworn to edge and oath; you move with disciplined grace in shadowed halls. Socially reserved and exact, you are driven by honor, ritual, and the refinement of the sword.`,
+      'Brujah': `A coiled ember, roaring for change and conviction; you gather and lead with fierce abandon. You live for passion and righteous fury, charging at injustice with raw force.`,
+      'Gangrel': `A wild heart that smells of earth and storm; you are solitary and rooted in the body. You survive by instinct and endurance, answering only to raw necessity and freedom.`,
+      'Hecata': `Keepers of the dead and their liturgies; you are solemn, ritual-bound, and patient. Memory and ceremony guide your actions, serving duty over display.`,
+      'Lasombra': `Shadow-noble and masterful, you rule the curtains rather than the stage. Influence, domination, and the calculated use of darkness are your tools.`,
+      'Malkavian': `Eyes like broken glass and a laugh that smells of truth; you navigate the world with uncanny insight. Your drives are prophecy and revelation, often disguised as madness.`,
+      'Ministry': `Organized, doctrinal, and efficient — you are service draped in purpose. Practical governance and mission define your moves, favoring order and utility.`,
+      'Nosferatu': `Hidden and watchful beneath the city; you survive by secrecy and information. Loners by necessity, you are driven by survival, stealth, and the hoard of knowledge.`,
+      'Ravnos': `A traveling mirage, quick with trick and tale; you prize freedom and performance. Cunning and wandering keep you alive — you are fueled by luck and spectacle.`,
+      'Salubri': `A somber healer with a haunted gaze; you walk thin lines between mercy and sorrow. Compassion and cure drive you, often at personal cost.`,
+      'Toreador': `An aesthete wrapped in velvet gloom; beauty and social light are your sustenance. You gather salons, patrons, and admiration — creation and longing propel you.`,
+      'Tremere': `A scholar in blood and runes; you collect secrets and shape them into power. Study, ritual, and arcane order are your hunger and shield.`,
+      'Tzimisce': `Artificer of flesh and cold artisan; you sculpt life to your design. Mastery, transformation, and meticulous craft define your aims.`,
+      'Ventrue': `Regal, measured, and quietly commanding — you carry authority like a mask. Influence, hierarchy, and control are your appetites and instruments.`
+    };
+
+    // === Build slider UI ===
+    const grid = document.getElementById('slidersGrid');
+
+    sliders.forEach((s, idx) => {
+      const card = document.createElement('div');
+      card.className = 'slider-card';
+      card.innerHTML = `
+        <div class="prompt">${s.prompt}</div>
+        <label for="${s.id}" class="visually-hidden">Slider ${idx+1}: ${s.leftLabel} to ${s.rightLabel}</label>
+        <input type="range" id="${s.id}" min="0" max="100" value="50" aria-label="Slider ${idx+1}: ${s.leftLabel} to ${s.rightLabel}">
+        <div class="labels"><span>${s.leftLabel}</span><span>${s.rightLabel}</span></div>
+        <div class="badges">
+          <div class="badge small grey" id="${s.id}-left">50% ${s.leftLabel}</div>
+          <div class="badge small grey" id="${s.id}-right">50% ${s.rightLabel}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // Utility: badge color logic
+    function badgeClassForPct(pct){
+      // pct: number 0..100
+      if (pct > 55) return 'green';
+      if (pct < 45) return 'red';
+      return 'grey';
+    }
+
+    // Update single slider badges
+    function updateSliderBadges(id){
+      const el = document.getElementById(id);
+      const leftBadge = document.getElementById(id + '-left');
+      const rightBadge = document.getElementById(id + '-right');
+      if(!el || !leftBadge || !rightBadge) return;
+      const val = Number(el.value);
+      const leftPct = 100 - val;
+      const rightPct = val;
+      leftBadge.textContent = `${leftPct}% ${leftBadge.textContent.split(' ').slice(1).join(' ')}`.replace(/^\s+/,'');
+      rightBadge.textContent = `${rightPct}% ${rightBadge.textContent.split(' ').slice(1).join(' ')}`.replace(/^\s+/,'');
+      // apply classes
+      leftBadge.className = 'badge small ' + (badgeClassForPct(leftPct) === 'green' ? 'green' : badgeClassForPct(leftPct) === 'red' ? 'red' : 'grey');
+      rightBadge.className = 'badge small ' + (badgeClassForPct(rightPct) === 'green' ? 'green' : badgeClassForPct(rightPct) === 'red' ? 'red' : 'grey');
+      el.setAttribute('aria-valuenow', String(val));
+    }
+
+    // attach listeners
+    sliders.forEach(s => {
+      const el = document.getElementById(s.id);
+      updateSliderBadges(s.id);
+      el.addEventListener('input', ()=> updateSliderBadges(s.id));
+      el.addEventListener('change', ()=> updateSliderBadges(s.id));
+    });
+
+    // === Scoring ===
+    function readValues(){
+      return sliders.map(s => {
+        const el = document.getElementById(s.id);
+        return el ? Number(el.value) : 50;
+      });
+    }
+
+    function computeClanScores(values){
+      // values: array length 36 of 0..100
+      // For each clan, accumulate sum(weight_left * (100 - val) + weight_right * val) over all sliders
+      const clanRaw = clanNames.map(_ => 0);
+      values.forEach((v, sidx) => {
+        const leftContribution = 100 - v;
+        const rightContribution = v;
+        const row = weights[sidx] || [];
+        for(let c=0;c<clanNames.length;c++){
+          const pair = row[c] || [0,0];
+          clanRaw[c] += pair[0]*leftContribution + pair[1]*rightContribution;
+        }
+      });
+      // Normalize to percentages sum 100
+      const total = clanRaw.reduce((a,b)=>a+b,0);
+      if(total <= 0.0001){
+        // fallback: equal distribution
+        return clanNames.map((name, idx)=>({id:name,pct:100/clanNames.length, raw:clanRaw[idx]}));
+      }
+      return clanRaw.map((raw, idx)=>({id:clanNames[idx], pct:(raw/total)*100, raw}));
+    }
+
+    // Create icon (simple initials)
+    function makeIcon(name){
+      const safe = name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+      const bg = '#111';
+      return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+        <rect width="100" height="100" rx="12" fill="${bg}" />
+        <text x="50" y="60" font-family="Georgia, serif" font-size="36" text-anchor="middle" fill="white" opacity="0.95">${safe}</text>
+      </svg>`;
+    }
+
+    // Render results
+    function renderResults(sorted){
+      // Primary
+      const primary = sorted[0];
+      document.getElementById('primaryName').textContent = `${primary.id} — ${primary.pct.toFixed(1)}%`;
+      document.getElementById('primaryDesc').textContent = descriptions[primary.id] || '';
+      document.getElementById('primaryIcon').innerHTML = makeIcon(primary.id);
+
+      // Secondaries (next two)
+      const secContainer = document.getElementById('secondaries');
+      secContainer.innerHTML = '';
+      for(let i=1;i<=2 && i<sorted.length;i++){
+        const el = document.createElement('div');
+        el.className = 'secondary-card';
+        el.innerHTML = `<strong>${sorted[i].id}</strong><div style="color:var(--muted);margin-top:6px">${sorted[i].pct.toFixed(1)}%</div>`;
+        secContainer.appendChild(el);
+      }
+      secContainer.setAttribute('aria-hidden','false');
+
+      // Full list
+      const full = document.getElementById('fullList');
+      full.innerHTML = '';
+      sorted.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'bar-row';
+        row.innerHTML = `
+          <div class="bar-label">${item.id}</div>
+          <div class="track" aria-hidden="true"><div class="fill" style="width:${Math.max(item.pct,0.5)}%"></div></div>
+          <div class="pct">${item.pct.toFixed(1)}%</div>
+        `;
+        full.appendChild(row);
+      });
+
+      // show result area
+      const res = document.getElementById('results');
+      res.style.display = 'block';
+      res.scrollIntoView({behavior:'smooth'});
+    }
+
+    // Button actions
+    document.getElementById('reveal').addEventListener('click', ()=>{
+      const vals = readValues();
+      const scores = computeClanScores(vals);
+      // sort descending by pct
+      const sorted = scores.sort((a,b)=>b.pct - a.pct);
+      renderResults(sorted);
+    });
+
+    document.getElementById('reset').addEventListener('click', ()=>{
+      sliders.forEach(s => {
+        const el = document.getElementById(s.id);
+        if(el){ el.value = 50; updateSliderBadges(s.id); }
+      });
+      document.getElementById('results').style.display = 'none';
+    });
+
+    // Initialize badges for all sliders
+    sliders.forEach(s => updateSliderBadges(s.id));
+  </script>
+</body>
+</html>
