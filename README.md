@@ -8,4 +8,4 @@ Move the sliders to express where you fall between opposing traits, click Reveal
 
 This is a fan-made quiz and not an official product of **White Wolf** or **Paradox Interactive**. Use non-commercially and respect the original IP.
 
-This quiz was heavely inspared by: [The Official Knights Radiant Order Quiz](https://www.brandonsanderson.com/pages/official-knights-radiant-order-quiz).
+This quiz was heavily inspired by: [The Official Knights Radiant Order Quiz](https://www.brandonsanderson.com/pages/official-knights-radiant-order-quiz).
