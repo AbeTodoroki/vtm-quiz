@@ -19,7 +19,6 @@
         html, body {
             height: 100%;
             margin: 0;
-            background: linear-gradient(180deg, #030303 0%, #0b0b0d 100%);
             color: #efefef;
             font-family: sans-serif, serif
         }
@@ -68,14 +67,14 @@
             margin-bottom: 0.5rem;
         }
 
+        input[type=range] {
+            flex-grow: 1;
+        }
+
         .badge {
-            min-width: 110px;
-            padding: 6px 8px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.03)
+            width: fit-content;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .badge.green {
@@ -191,10 +190,10 @@
         }
 
         .instructions {
-            text-align: left;
+            align-items: center;
+            text-align: justify;
             margin-bottom: 32px;
-            width: 70%;
-            margin-left: 0;
+            margin-left: auto;
             margin-right: auto;
         }
 
@@ -207,12 +206,13 @@
 </head>
 <body>
 <div class="container" role="application" aria-labelledby="title">
-    <h1 style="margin-bottom: 32px;" id="title">Which Vampire: The Masquerade Clan Are You?</h1>
+    <h1 style="margin-bottom: 32px; text-align: center" id="title">Which Vampire: The Masquerade Clan Are You?</h1>
 
+    <h2 style="margin-bottom: 16px; text-align: left">How to use:</h2>
     <div class="instructions">
-        Move the sliders toward the traits you most identify with,
-        and the quiz will sort you into the clan you would most likely belong to,
-        along with the likelihoods of your belonging to the other clans.
+        Move the sliders toward the traits you most identify with,<br>
+        and the quiz will sort you into the clan you would most likely belong to,<br>
+        along with the likelihoods of your belonging to the other clans.<br>
         This quiz will only take a few minutes.
     </div>
 
@@ -239,6 +239,18 @@
             </div>
         </div>
     </form>
+        <div style="margin-top: 32px">
+            <strong>License & Legal Note</strong><br>
+            This is a fan-made quiz and not an official product of White Wolf or Paradox Interactive.<br>
+            Use non-commercially and respect the original IP.<br>
+            <br>
+            This quiz was heavely inspared in The Official Knights Radiant Order Quiz.<br>
+            <p>
+                <a href="https://github.com/AbeTodoroki/vtm-quiz" style="color: white">GitHub repository</a>
+            </p>
+        </div>
+    <div>
+    </div>
 </div>
 
 <script>
@@ -616,7 +628,7 @@
             const row = document.createElement('div');
             row.className = 'bar-row';
             row.innerHTML = `
-      <div style="display:flex;align-items:center;gap:12px;width:100%;">
+      <div style="display:flex;align-items:center;gap:16px;width:100%;">
         <div style="flex:0 0 40px; width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
           ${iconUrl ? `
   <div style="width:40px;height:40px;border-radius:6px;background:lightgrey;display:flex;align-items:center;justify-content:center;padding:4px;box-sizing:border-box;overflow:hidden;border:1px solid rgba(0,0,0,0.06)">
