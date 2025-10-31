@@ -247,7 +247,7 @@
             This is a fan-made quiz and not an official product of White Wolf or Paradox Interactive.<br>
             Use non-commercially and respect the original IP.<br>
             <br>
-            This quiz was heavely inspared in The Official Knights Radiant Order Quiz.<br>
+            This quiz was heavely inspared by: The Official Knights Radiant Order Quiz.<br>
             <p>
                 <a href="https://github.com/AbeTodoroki/vtm-quiz" style="color: white">GitHub repository</a>
             </p>
@@ -587,7 +587,7 @@
         return clanRaw.map((r, idx) => {
             const maxPossible = clanMax[idx];
             const pct = maxPossible > 0 ? (r / maxPossible) * 100 : 0;
-            return {id: clanNames[idx], pct: Math.round(pct), raw: r, max: maxPossible};
+            return {id: clanNames[idx], pct: parseFloat(pct.toFixed(1)), raw: r, max: maxPossible};
         });
     }
 
